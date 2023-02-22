@@ -51,11 +51,12 @@ $products = Product::whereIn('id',array_keys($array))->get();
             \Log::info($weight);
         array_push($variation, ['type'=>'','weight'=>$weight,'price'=>$product->Price->price ??0,'discount'=>0,'sku'=>'13-6165','qty'=>$product->Price->quantity??0,'parent'=>'13-SCF-W20-001-BRG']);
         $ProductName = preg_replace('/\d+/u', '', $product->name);
+        $NewNameProduct= str_replace('جم',"",$ProductName);
          DB::connection('mysql2')->table($nameTable2)->insert([
             'added_by'=>'admin',
             'user_id'=>'1',
-            'name'=>$ProductName??'',
-            'slug'=>!empty($ProductName)?Str::slug($ProductName):'',
+            'name'=>$NewNameProduct??'',
+            'slug'=>!empty($NewNameProduct)?Str::slug($NewNameProduct):'',
             'category_ids'=>!empty($category_ids)?json_encode($category_ids):'',
             'brand_id'=>'1',
             'unit'=>'pc',

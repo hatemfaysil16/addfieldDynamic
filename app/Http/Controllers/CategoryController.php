@@ -13,9 +13,9 @@ class CategoryController extends Controller
     public function __invoke(){
         $nameTable='pages';
         $nameTable2='categories';
-        $contactUs=DB::connection('mysql')->table($nameTable)->
-        select('name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
-        ->get()->toArray();
+        // $contactUs=DB::connection('mysql')->table($nameTable)->
+        // select('name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
+        // ->get()->toArray();
         // foreach($contactUs as $item){
         //     foreach($item as $key=>$value){
         //         $this->myDropColumnIfExists($nameTable2,$key);
@@ -25,20 +25,13 @@ class CategoryController extends Controller
         select('name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
         ->get()->toArray();
         foreach($contacts as $contact){
-// name	
-// slug	
-// icon	
-// parent_id	
-// position	
-// created_at	
-// updated_at	
-// home_status	
-// priority
          DB::connection('mysql2')->table($nameTable2)->insert([
             'name'=>$contact->name,
             'slug'=>Str::slug($contact->name),
             'icon'=>$contact->icon,
             'parent_id'=>$contact->sub_of,
+            'position'=>'0',
+            'home_status'=>'1',
             'description'=>$contact->description,
             'selector'=>$contact->selector,
             'nav'=>$contact->nav,
