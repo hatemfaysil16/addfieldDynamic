@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+ 
     public function __invoke(){
         $nameTable='page_product';
         $nameTable2='products';
@@ -48,37 +49,41 @@ $products = Product::whereIn('id',array_keys($array))->get();
             foreach($matches as $matche){
                 $weight=implode($matche);
             }
-            \Log::info($weight);
-        array_push($variation, ['type'=>'','weight'=>$weight,'price'=>$product->Price->price ??0,'discount'=>0,'sku'=>'13-6165','qty'=>$product->Price->quantity??0,'parent'=>'13-SCF-W20-001-BRG']);
         $ProductName = preg_replace('/\d+/u', '', $product->name);
         $NewNameProduct= str_replace('جم',"",$ProductName);
-         DB::connection('mysql2')->table($nameTable2)->insert([
-            'added_by'=>'admin',
-            'user_id'=>'1',
-            'name'=>$NewNameProduct??'',
-            'slug'=>!empty($NewNameProduct)?Str::slug($NewNameProduct):'',
-            'category_ids'=>!empty($category_ids)?json_encode($category_ids):'',
-            'brand_id'=>'1',
-            'unit'=>'pc',
-            'min_qty'=>'1',
-            'refundable'=>'1',
-            'images'=>!empty($product->image)?json_encode($product->image):'',
-            'featured'=>'',
-            'colors'=>'',
-            'variant_product'=>0,
-            'attributes'=>'',
-            'choice_options'=>'',
-            'variation'=>json_encode($variation),
-            'published'=>0,
-            'unit_price'=>0,
-            'purchase_price'=>0,
-            'discount'=>'',
-            'discount_type'=>'',
-            'current_stock'=>0,
-            'details'=>'',
-            'status'=>0,
-            'code'=>'',
-         ]);
+    $products = Product::where('name', 'like' , "%{$NewNameProduct}")->get()->pluck('image','quantity','name');
+    foreach($products as $items){
+            \Log::info($weight);
+        dd($items);
+    }
+        array_push($variation, ['type'=>'','weight'=>$weight,'price'=>$product->Price->price ??0,'discount'=>0,'sku'=>'13-6165','qty'=>$product->Price->quantity??0,'parent'=>'13-SCF-W20-001-BRG']);
+        //  DB::connection('mysql2')->table($nameTable2)->insert([
+        //     'added_by'=>'admin',
+        //     'user_id'=>'1',
+        //     'name'=>$NewNameProduct??'',
+        //     'slug'=>!empty($NewNameProduct)?Str::slug($NewNameProduct):'',
+        //     'category_ids'=>!empty($category_ids)?json_encode($category_ids):'',
+        //     'brand_id'=>'1',
+        //     'unit'=>'pc',
+        //     'min_qty'=>'1',
+        //     'refundable'=>'1',
+        //     'images'=>!empty($product->image)?json_encode($product->image):'',
+        //     'featured'=>'',
+        //     'colors'=>'',
+        //     'variant_product'=>0,
+        //     'attributes'=>'',
+        //     'choice_options'=>'',
+        //     'variation'=>json_encode($variation),
+        //     'published'=>0,
+        //     'unit_price'=>0,
+        //     'purchase_price'=>0,
+        //     'discount'=>'',
+        //     'discount_type'=>'',
+        //     'current_stock'=>0,
+        //     'details'=>'',
+        //     'status'=>0,
+        //     'code'=>'',
+        //  ]);
         }
         
         dd('success');
