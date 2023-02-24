@@ -37,7 +37,6 @@ foreach ($array as $value) {
 }
 $productsId = array_unique( $uniques,SORT_REGULAR );
 $products = Product::whereIn('id',array_keys($array))->get();
-
         foreach($products as $product){
             $category_ids = array();
             foreach($product->PageProduct as $item){
@@ -51,39 +50,52 @@ $products = Product::whereIn('id',array_keys($array))->get();
             }
         $ProductName = preg_replace('/\d+/u', '', $product->name);
         $NewNameProduct= str_replace('جم',"",$ProductName);
-    $products = Product::where('name', 'like' , "%{$NewNameProduct}")->get()->pluck('image','quantity','name');
-    foreach($products as $items){
-            \Log::info($weight);
-        dd($items);
-    }
-        array_push($variation, ['type'=>'','weight'=>$weight,'price'=>$product->Price->price ??0,'discount'=>0,'sku'=>'13-6165','qty'=>$product->Price->quantity??0,'parent'=>'13-SCF-W20-001-BRG']);
-        //  DB::connection('mysql2')->table($nameTable2)->insert([
-        //     'added_by'=>'admin',
-        //     'user_id'=>'1',
-        //     'name'=>$NewNameProduct??'',
-        //     'slug'=>!empty($NewNameProduct)?Str::slug($NewNameProduct):'',
-        //     'category_ids'=>!empty($category_ids)?json_encode($category_ids):'',
-        //     'brand_id'=>'1',
-        //     'unit'=>'pc',
-        //     'min_qty'=>'1',
-        //     'refundable'=>'1',
-        //     'images'=>!empty($product->image)?json_encode($product->image):'',
-        //     'featured'=>'',
-        //     'colors'=>'',
-        //     'variant_product'=>0,
-        //     'attributes'=>'',
-        //     'choice_options'=>'',
-        //     'variation'=>json_encode($variation),
-        //     'published'=>0,
-        //     'unit_price'=>0,
-        //     'purchase_price'=>0,
-        //     'discount'=>'',
-        //     'discount_type'=>'',
-        //     'current_stock'=>0,
-        //     'details'=>'',
-        //     'status'=>0,
-        //     'code'=>'',
-        //  ]);
+                $productsOld = Product::where('name', 'like' , '%'."{$NewNameProduct}".'%')->get();
+                $a=0;
+                $variation=array();
+                foreach($productsOld as $itemOld){
+                        preg_match_all('!\d+!', $itemOld->name, $matches);
+                        $weight=[];
+                        foreach($matches as $item){
+                            $weight[]=implode($item);
+                        }
+                        // array_push($variation, ['type'=>'','weight'=>$weight,'price'=>$itemOld->price->price ??0,'discount'=>0,'sku'=>'13-6165','qty'=>$itemOld->quantity??0,'parent'=>'13-SCF-W20-001-BRG']);
+                        $a++;
+                        $variation[$a]['type']='';
+                        $variation[$a]['price']=$itemOld->price->price ??0;
+                        $variation[$a]['discount']=0;
+                        $variation[$a]['sku']='13-6165';
+                        $variation[$a]['qty']=$itemOld->quantity??0;
+                        $variation[$a]['weight']=implode($weight);
+                        $variation[$a]['parent']='13-SCF-W20-001-BRG';
+                }
+         DB::connection('mysql2')->table($nameTable2)->insert([
+            'added_by'=>'admin',
+            'user_id'=>'1',
+            'name'=>\trim($NewNameProduct)??'',
+            'slug'=>!empty($NewNameProduct)?Str::slug($NewNameProduct):'',
+            'category_ids'=>!empty($category_ids)?json_encode($category_ids):'',
+            'brand_id'=>'1',
+            'unit'=>'pc',
+            'min_qty'=>'1',
+            'refundable'=>'1',
+            'images'=>!empty($product->image)?json_encode($product->image):'',
+            'featured'=>'',
+            'colors'=>'',
+            'variant_product'=>0,
+            'attributes'=>'',
+            'choice_options'=>'',
+            'variation'=>json_encode($variation),
+            'published'=>0,
+            'unit_price'=>0,
+            'purchase_price'=>0,
+            'discount'=>'',
+            'discount_type'=>'',
+            'current_stock'=>0,
+            'details'=>'',
+            'status'=>0,
+            'code'=>'',
+         ]);
         }
         
         dd('success');
