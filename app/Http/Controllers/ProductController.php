@@ -38,6 +38,7 @@ foreach ($array as $value) {
 $productsId = array_unique( $uniques,SORT_REGULAR );
 $products = Product::whereIn('id',array_keys($array))->get();
         foreach($products as $product){
+
             $category_ids = array();
             foreach($product->PageProduct as $item){
                 array_push($category_ids, ['id'=>$item->id,'postion'=>0]);
@@ -50,7 +51,16 @@ $products = Product::whereIn('id',array_keys($array))->get();
             }
         $ProductName = preg_replace('/\d+/u', '', $product->name);
         $NewNameProduct= str_replace('جم',"",$ProductName);
-                $productsOld = Product::where('name', 'like' , '%'."{$NewNameProduct}".'%')->get();
+            $explodeProduct = explode(' ',$NewNameProduct);
+            dd($explodeProduct);
+            $arraysProduct=[];
+            foreach($explodeProduct as $key=>$dataExplodeProduct){
+                if(isset($dataExplodeProduct[$key])){
+                    $arraysProduct[]=$dataExplodeProduct;
+                }
+            }
+             $searchProduct=(join(" ",$arraysProduct));
+                $productsOld = Product::where('name', 'like' , '%'."{$searchProduct}".'%')->get();
                 $a=0;
                 $variation=array();
                 foreach($productsOld as $itemOld){
