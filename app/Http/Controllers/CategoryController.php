@@ -22,10 +22,22 @@ class CategoryController extends Controller
         //     }
         // }
         $contacts=DB::connection('mysql')->table($nameTable)->
-        select('name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
+        select('id','name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
+        ->whereNotIn('id', [127,128,160,161,162,163,164,165,166,167,168,169,170,235,236,237,238,186,187,188,189,190,192,193,194,195,200])
         ->get()->toArray();
         foreach($contacts as $contact){
+        $image=[];
+        $banner=[];
+        $ExplodImage=explode('/',$contact->image);
+        $EndExplodeImage = end($ExplodImage);
+        array_push($image, $EndExplodeImage);
+        \Log::info($image);
+        $ExplodeBanner=explode('/',$contact->banner);
+        $EndExplodeBanner = end($ExplodeBanner);
+        array_push($banner, $EndExplodeBanner);
+
          DB::connection('mysql2')->table($nameTable2)->insert([
+            'id'=>$contact->id,
             'name'=>$contact->name,
             'slug'=>Str::slug($contact->name),
             'icon'=>$contact->icon,
@@ -38,14 +50,14 @@ class CategoryController extends Controller
             'gallery'=>$contact->gallery,
             'deleted'=>$contact->deleted,
             'dropdown'=>$contact->dropdown,
-            'image'=>$contact->image,
-            'banner'=>$contact->banner,
+            'image'=>$image[0]??'',
+            'banner'=>$banner[0]??'',
             'order'=>$contact->order,
             'created_at'=>$contact->created_at,
             'updated_at'=>$contact->updated_at,
          ]);
         }
-        
+
         dd('success');
     }
 

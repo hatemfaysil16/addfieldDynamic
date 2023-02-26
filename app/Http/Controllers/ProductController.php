@@ -13,10 +13,14 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
- 
     public function __invoke(){
+
+        // $contacts=DB::connection('mysql2')->table('products')->first();
+        // $userData=json_decode(json_encode($contacts), true);
+        // dd(($userData['details']));
         $nameTable='page_product';
         $nameTable2='products';
+        $code = uniqid(mt_rand(10, 99));
         $products = Product::get()->pluck('id','name');
     $array=array();
         foreach($products as $key=>$value){
@@ -38,12 +42,11 @@ foreach ($array as $value) {
 $productsId = array_unique( $uniques,SORT_REGULAR );
 $products = Product::whereIn('id',array_keys($array))->get();
         foreach($products as $product){
-
             $category_ids = array();
-            foreach($product->PageProduct as $item){
-                array_push($category_ids, ['id'=>$item->id,'postion'=>0]);
+            $PageProduct = PageProduct::where('product_id',$product->id)->get();
+            foreach($PageProduct as $item){
+                array_push($category_ids, ['id'=>$item->page_id,'postion'=>0]);
             }
-            array_push($category_ids, ['id'=>$item->id,'postion'=>0]);
             $variation = array();
             preg_match_all('!\d+!', $product->name, $matches);
             foreach($matches as $matche){
@@ -51,8 +54,7 @@ $products = Product::whereIn('id',array_keys($array))->get();
             }
         $ProductName = preg_replace('/\d+/u', '', $product->name);
         $NewNameProduct= str_replace('جم',"",$ProductName);
-            $explodeProduct = explode(' ',$NewNameProduct);
-            dd($explodeProduct);
+        $explodeProduct = explode(' ',$NewNameProduct);
             $arraysProduct=[];
             foreach($explodeProduct as $key=>$dataExplodeProduct){
                 if(isset($dataExplodeProduct[$key])){
@@ -60,26 +62,36 @@ $products = Product::whereIn('id',array_keys($array))->get();
                 }
             }
              $searchProduct=(join(" ",$arraysProduct));
-                $productsOld = Product::where('name', 'like' , '%'."{$searchProduct}".'%')->get();
-                $a=0;
-                $variation=array();
-                foreach($productsOld as $itemOld){
-                        preg_match_all('!\d+!', $itemOld->name, $matches);
-                        $weight=[];
-                        foreach($matches as $item){
-                            $weight[]=implode($item);
-                        }
-                        // array_push($variation, ['type'=>'','weight'=>$weight,'price'=>$itemOld->price->price ??0,'discount'=>0,'sku'=>'13-6165','qty'=>$itemOld->quantity??0,'parent'=>'13-SCF-W20-001-BRG']);
-                        $a++;
-                        $variation[$a]['type']='';
-                        $variation[$a]['price']=$itemOld->price->price ??0;
-                        $variation[$a]['discount']=0;
-                        $variation[$a]['sku']='13-6165';
-                        $variation[$a]['qty']=$itemOld->quantity??0;
-                        $variation[$a]['weight']=implode($weight);
-                        $variation[$a]['parent']='13-SCF-W20-001-BRG';
+            $productsOld = Product::where('name', 'like' , '%'."{$searchProduct}".'%')->get();
+            $variation=array();
+            $images=array();
+            $colors=array();
+            $FieldweightOption=array();
+            foreach($productsOld as $itemOld){
+                preg_match_all('!\d+!', $itemOld->name, $matches);
+                foreach($matches as $item){
+                    $weight=implode($item);
                 }
-         DB::connection('mysql2')->table($nameTable2)->insert([
+                $explode=explode('/',$itemOld->image);
+                $EndExplodeImage = end($explode);
+                array_push($images, $EndExplodeImage);
+                array_push($colors, [$weight]);
+                array_push($variation, ['type'=>$weight,'weight'=>$weight,'price'=>$itemOld->price->price ??0,'discount'=>0,'sku'=>uniqid(mt_rand(10, 99)),'qty'=>$itemOld->quantity??0,'parent'=>$code]);
+            }
+            $details =  $product->taste.$product->benefits.$product->how_to_use.$product->description;
+            $WeightColum = array_column($variation, 'weight');
+            $arrayUniqueWeight = array_unique( $WeightColum,SORT_REGULAR );
+            $weightOption = ['name'=>'choice_1','title'=>'Weight','options'=>$arrayUniqueWeight];
+            array_push($FieldweightOption, $weightOption);
+            $QtyColum = array_column($variation, 'qty');
+            $sumQty = array_sum($QtyColum);
+            $priceColum = array_column($variation , 'price');
+            $minPrice =!empty($priceColum)?min($priceColum):'';
+            $maxPrice =!empty($priceColum)?min($priceColum):'';
+            $unit_price = ($minPrice>0)?$minPrice:$maxPrice;
+            $purchase_price = ($minPrice>0)?$minPrice:$maxPrice;
+             DB::connection('mysql2')->table($nameTable2)->insert([
+            'id'=>$product->id,
             'added_by'=>'admin',
             'user_id'=>'1',
             'name'=>\trim($NewNameProduct)??'',
@@ -89,25 +101,27 @@ $products = Product::whereIn('id',array_keys($array))->get();
             'unit'=>'pc',
             'min_qty'=>'1',
             'refundable'=>'1',
-            'images'=>!empty($product->image)?json_encode($product->image):'',
+            'images'=>!empty($images)?json_encode($images):'',
+            'thumbnail'=>isset($images[0])?$images[0]:'',
             'featured'=>'',
-            'colors'=>'',
+            'video_provider'=>'youtube',
             'variant_product'=>0,
-            'attributes'=>'',
-            'choice_options'=>'',
+            'attributes'=>null,
+            'choice_options'=>!empty($WeightColum[0])?\json_encode($FieldweightOption):'[]',
             'variation'=>json_encode($variation),
-            'published'=>0,
-            'unit_price'=>0,
-            'purchase_price'=>0,
-            'discount'=>'',
+            'published'=>$sumQty>0?1:0,
+            'unit_price'=>!empty($unit_price)?$unit_price:0,
+            'purchase_price'=>!empty($purchase_price)?$purchase_price:0,
+            'colors'=>'[]',
+            'discount'=>0,
             'discount_type'=>'',
-            'current_stock'=>0,
-            'details'=>'',
-            'status'=>0,
-            'code'=>'',
+            'current_stock'=>$sumQty??'',
+            'details'=>$details??'',
+            'status'=>$sumQty>0?1:0,
+            'code'=>$code,
          ]);
         }
-        
+
         dd('success');
     }
 
