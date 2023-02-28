@@ -13,6 +13,16 @@ class CategoryController extends Controller
     public function __invoke(){
         $nameTable='pages';
         $nameTable2='categories';
+
+        $contacts=DB::connection('mysql2')->table($nameTable2)->get();
+
+        $b = \json_decode(\json_encode($contacts),true);
+        foreach($b as $itemss){
+            $NewNameProduct= str_replace(' ','-',$itemss['name']);
+           DB::connection('mysql2')->table($nameTable2)->where('id',$itemss['id'])->update(['slug'=>$NewNameProduct]);
+        }
+        // dd($contacts);
+        dd('stop');
         // $contactUs=DB::connection('mysql')->table($nameTable)->
         // select('name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
         // ->get()->toArray();
@@ -24,6 +34,7 @@ class CategoryController extends Controller
         $contacts=DB::connection('mysql')->table($nameTable)->
         select('id','name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
         ->whereNotIn('id', [127,128,160,161,162,163,164,165,166,167,168,169,170,235,236,237,238,186,187,188,189,190,192,193,194,195,200])
+        // new add [128,161,162,163,164,165,166,167,168,169,170,235]
         ->get()->toArray();
         foreach($contacts as $contact){
         $image=[];
@@ -31,7 +42,6 @@ class CategoryController extends Controller
         $ExplodImage=explode('/',$contact->image);
         $EndExplodeImage = end($ExplodImage);
         array_push($image, $EndExplodeImage);
-        \Log::info($image);
         $ExplodeBanner=explode('/',$contact->banner);
         $EndExplodeBanner = end($ExplodeBanner);
         array_push($banner, $EndExplodeBanner);
@@ -40,7 +50,7 @@ class CategoryController extends Controller
             'id'=>$contact->id,
             'name'=>$contact->name,
             'slug'=>Str::slug($contact->name),
-            'icon'=>$contact->icon,
+            'icon'=>$image[0] ??'',
             'parent_id'=>$contact->sub_of,
             'position'=>'0',
             'home_status'=>'1',
