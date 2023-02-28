@@ -12,13 +12,16 @@ class Page extends Model
     use HasFactory;
 protected $connection="mysql";
 protected $table="pages";
-protected $guarded = [];
-    public function parentUp():BelongsTo
+    protected $fillable = [
+        'name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image'
+    ];
+
+        public function parentUp()
     {
         return $this->belongsTo(self::class, 'sub_of');
     }
-    public function children():HasMany
+    public function children()
     {
-        return $this->hasMany(self::class, 'sub_of');
+        return $this->hasMany(Page::class, 'sub_of','id');
     }
 }

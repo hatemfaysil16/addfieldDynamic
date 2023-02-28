@@ -13,16 +13,6 @@ class CategoryController extends Controller
     public function __invoke(){
         $nameTable='pages';
         $nameTable2='categories';
-
-        $contacts=DB::connection('mysql2')->table($nameTable2)->get();
-
-        $b = \json_decode(\json_encode($contacts),true);
-        foreach($b as $itemss){
-            $NewNameProduct= str_replace(' ','-',$itemss['name']);
-           DB::connection('mysql2')->table($nameTable2)->where('id',$itemss['id'])->update(['slug'=>$NewNameProduct]);
-        }
-        // dd($contacts);
-        dd('stop');
         // $contactUs=DB::connection('mysql')->table($nameTable)->
         // select('name','slug','description','selector','nav','gallery','sub_of','deleted','dropdown','image','banner','icon','order','created_at','updated_at')
         // ->get()->toArray();

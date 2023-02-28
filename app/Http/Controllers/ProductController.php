@@ -28,8 +28,8 @@ class ProductController extends Controller
             $category_ids = [];
             $PageProduct = PageProduct::where('product_id',$product->id)->get();
             foreach($PageProduct as $item){
-                if(isset($item->page->children)){
-                    foreach($item->page->children??'[]' as $newItemId){
+                if(isset($item->page)){
+                    foreach($item->page->children as $newItemId){
                         array_push($category_ids, ['id'=>\json_encode($newItemId->id),'position'=>0]);
                     }
                 }
@@ -47,7 +47,6 @@ class ProductController extends Controller
             $FieldWeightOption=[];
             $weightOption = ['name'=>'choice_1','title'=>'Weight','options'=>[$weight]];
             array_push($FieldWeightOption, $weightOption);
-            // dd($FieldWeightOption);
             //weight end
             //price start
             $price = array_column($variation , 'price');
@@ -69,7 +68,7 @@ class ProductController extends Controller
             'user_id'=>'1',
             'name'=>$product->name,
             'slug'=>$product->slug,
-            'category_ids'=>!empty($category_ids)?json_encode($category_ids):'',
+            'category_ids'=>isset($category_ids)?json_encode($category_ids):'',
             'brand_id'=>'1',
             'unit'=>'pc',
             'min_qty'=>'1',
