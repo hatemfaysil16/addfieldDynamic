@@ -25,8 +25,9 @@ class ProductUpdateController extends Controller
         // variation
         $variation=[];
         foreach(\json_decode($product->variation) as $ItemVariation){
-            array_push($variation, ['type'=>$ItemVariation->type,'weight'=>$ItemVariation->weight,'price'=>!empty($productsOldPrice)?$productsOldPrice:$ItemVariation->price,
-            'discount'=>$ItemVariation->discount,'sku'=>$ItemVariation->sku,'qty'=>$ItemVariation->qty,'parent'=>$ItemVariation->parent]);
+            // \Log::info('id/'.  $product->id .'<br>'.$ItemVariation->weight ?? '');
+            array_push($variation, ['type'=>$ItemVariation->type,'weight'=>$ItemVariation->weight ?? '','price'=>!empty($productsOldPrice)?$productsOldPrice:$ItemVariation->price,
+            'discount'=>$ItemVariation->discount ?? 0,'sku'=>$ItemVariation->sku,'qty'=>$ItemVariation->qty,'parent'=>$ItemVariation->parent ?? 0]);
         }
         // variation
             //new update price database
